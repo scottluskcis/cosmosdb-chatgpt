@@ -1,5 +1,6 @@
 ﻿@using Cosmos.Chat.GPT.Constants
 @using Cosmos.Chat.GPT.Services
+@using System.ComponentModel.DataAnnotations;
 @inject ChatService chatService
 
 
@@ -31,6 +32,26 @@
         {
             <div>
                 <nav class="flex-column">
+                    <div class="row row-cols-1 g-2 px-2 d-flex flex-column align-items-start">
+                        <div class="col">
+                            <label for="sysprompt" class="form-label">System Prompt:</label>
+                            <InputSelect id="sysprompt" @bind-Value="SelectedSystemPrompt" class="form-select">
+                                @foreach (var prompt in SystemPrompt.GetAllItems())
+                                {
+                                    <option value="@prompt.Message">@prompt.DisplayText</option>
+                                }
+                            </InputSelect> 
+                        </div>
+                        <div class="col" style="max-width: 575px;">
+                            <div class="card">
+                                <div class="card-body user-selected-none"> 
+                                    <span> 
+                                        @FormatAsHtml(SelectedSystemPrompt)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="nav-item py-2 d-grid">
                         <NavLink style="cursor:pointer" class="btn btn-sm mx-1 btn-secondary d-flex flex-row align-items start" Match="NavLinkMatch.All" @onclick="@(e => NewChat())">
                             <i class="bi bi-plus"></i>
@@ -124,6 +145,7 @@
     private bool _renamePopUpOpen = false;
 
     public Session? CurrentSession;
+    public string SelectedSystemPrompt = SystemPrompt.GetDefault().Message;
 
     private static event EventHandler<string>? OnNavMenuChanged;
 
@@ -147,6 +169,11 @@
                 await LoadCurrentChatAsync();
             });
         };
+    }
+
+    protected string FormatAsHtml(string value)
+    {
+        return value.Replace(Environment.NewLine, "<br />");
     }
 
     private void OpenConfirmation(string id, string title)
@@ -338,4 +365,6 @@
         null => string.Empty,
         _ => text.Length > maxLength ? text.Substring(0, maxLength) + "..." : text
     };
+     
 }
+
